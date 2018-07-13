@@ -21,6 +21,5 @@ List of files:
 		
 How to Run:
 	1. In line-17 of FacebookRenderEngine.py file, add the path of chromedriver.
-	2. In line-246 of Controller.py file, replace username with your facebook user_id and password with your facebook password.
-	3. Run the program using : python3 Controller.py
+	2. Run the program using : python3 Controller.py
 	

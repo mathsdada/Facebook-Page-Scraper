@@ -242,12 +242,12 @@ def generate_comments_sheet(post_data_list):
 
 user_network_cache = {}
 user_liked_pages_cache = {}
-output_file_name = "facebook_{}.xlsx".format('output')
 writer = pd.ExcelWriter(output_file_name)
 print("Please login to your facebook account")
 username = input("Username:  ")
 password = input("Password:  ")
 page_name = input("Enter page name (if page link is like https://www.facebook.com/NASA/, then enter only NASA): ")
+output_file_name = "facebook_{}.xlsx".format(page_name)
 renderEngine = RenderEngine(username, password)
 post_list = get_post_list(page_name)
 generate_post_sheet(post_list)
