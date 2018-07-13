@@ -1,4 +1,3 @@
-from FacebookRenderEngine import RenderEngine
 from FacebookScraper import Scraper
 import pandas as pd
 
@@ -25,16 +24,13 @@ def list_to_string(list_data, default):
 
 
 def get_post_list(page_title):
-    html_source = renderEngine.render_posts_of_page(page_title)
-    post_data_list = Scraper.get_post_list(html_source)
+    post_data_list = scraper.get_post_list(page_title)
     for post_data in post_data_list:
         post_link = "https://m.facebook.com/{}/posts/{}".format(post_data['page_id'], post_data['post_id'])
-        html_source = renderEngine.render_web_page(post_link)
-        post_details = Scraper.get_post_details(html_source)
+        post_details = scraper.get_post_details(post_link)
         post_data.update(post_details)
 
-        html_source = renderEngine.render_web_page(post_data['post_like_link'])
-        reactions_data = Scraper.get_reactions_count(html_source)
+        reactions_data = scraper.get_reactions_count(post_data['post_like_link'])
         post_data.update(reactions_data)
     return post_data_list
 
@@ -83,16 +79,10 @@ def generate_like_sheet(post_data_list):
     data_frame = pd.DataFrame(columns=like_sheet_columns)
     index = 0
     for post_data in post_data_list:
-        liked_user_list = Scraper.get_liked_user_list(
-            renderEngine.render_like_link_of_post(post_data['post_like_link']))
+        liked_user_list = scraper.get_liked_user_list(post_data['post_like_link'])
         for liked_user in liked_user_list:
             # Get User Network
-            if liked_user in user_network_cache:
-                user_network = user_network_cache[liked_user]
-            else:
-                user_network = Scraper.get_user_data(
-                    renderEngine.render_user_data(liked_user, "network"), "network")
-                user_network_cache[liked_user] = user_network
+            user_network = get_user_network(liked_user)
             # Check If user is a follower of page
             if is_user_a_follower_of_page(liked_user, post_data['page_id']):
                 is_user_page_follower = 1
@@ -110,12 +100,13 @@ def generate_like_sheet(post_data_list):
 
 
 def is_user_a_follower_of_page(user_id, page_id):
+    if len(user_id) == 0:
+        return False
     if user_id in user_liked_pages_cache:
         user_liked_pages = user_liked_pages_cache[user_id]
     else:
-        username = renderEngine.render_get_username_from_user_id(user_id)
-        user_liked_pages = Scraper.get_user_data(
-            renderEngine.render_user_data(username, "liked_pages"), "liked_pages")
+        username = scraper.get_username_from_user_id(user_id)
+        user_liked_pages = scraper.get_user_data(username, "liked_pages")
         user_liked_pages_cache[user_id] = user_liked_pages
     if page_id in user_liked_pages:
         return True
@@ -129,8 +120,7 @@ def get_user_network(user_id):
     if user_id in user_network_cache:
         network = user_network_cache[user_id]
     else:
-        network = Scraper.get_user_data(
-            renderEngine.render_user_data(user_id, "network"), "network")
+        network = scraper.get_user_data(user_id, "network")
         user_network_cache[user_id] = network
     return network
 
@@ -139,8 +129,7 @@ def generate_share_sheet(post_data_list):
     data_frame = pd.DataFrame(columns=share_sheet_columns)
     index = 0
     for post_data in post_data_list:
-        share_data_list = Scraper.get_shared_user_list(
-            renderEngine.render_share_link_of_post(post_data['post_share_link']), False)
+        share_data_list = scraper.get_shared_user_list(post_data['post_share_link'], False)
         for share_data in share_data_list:
             share_published_time = share_data['published_time']
             shared_user = share_data['user_id']
@@ -154,16 +143,14 @@ def generate_share_sheet(post_data_list):
                 is_user_page_follower = 0
                 degree = 2
             # Get number of Likes on share, number of followers of page in liked users
-            share_liked_user_list = Scraper.get_liked_user_list(
-                renderEngine.render_like_link_of_post(share_data['like_link']))
+            share_liked_user_list = scraper.get_liked_user_list(share_data['like_link'])
             num_of_users_liked_the_share = len(share_liked_user_list)
             num_of_page_followers_in_share_liked_users = 0
             for share_liked_user in share_liked_user_list:
                 if is_user_a_follower_of_page(share_liked_user, post_data['page_id']):
                     num_of_page_followers_in_share_liked_users += 1
             # Get number of Shares on share, number of followers of page in shared users
-            share_shared_data_list = Scraper.get_shared_user_list(
-                renderEngine.render_share_link_of_post(share_data['share_link']), True)
+            share_shared_data_list = scraper.get_shared_user_list(share_data['share_link'], True)
             num_of_users_shared_the_share = len(share_shared_data_list)
             num_of_page_followers_in_share_shared_users = 0
             for share_shared_data in share_shared_data_list:
@@ -215,18 +202,14 @@ def generate_comments_sheet(post_data_list):
     for post_data in post_data_list:
         page_id = post_data['page_id']
         post_id = post_data['post_id']
-        post_comment_data_list = Scraper.get_post_comments_data(
-            renderEngine.render_post_comments(page_id, post_id))
+        post_comment_data_list = scraper.get_post_comments_data(page_id, post_id)
         for post_comment_data in post_comment_data_list:
-            comment_author_id = Scraper.get_user_id_from_username(
-                renderEngine.render_user_profile(post_comment_data['comment_author']))
+            comment_author_id = scraper.get_user_id_from_username(post_comment_data['comment_author'])
             comment_author_network = get_user_network(comment_author_id)
-            comment_liked_user_list = Scraper.get_liked_user_list(
-                renderEngine.render_like_link_of_post(post_comment_data['comment_like_link']))
+            comment_liked_user_list = scraper.get_liked_user_list(post_comment_data['comment_like_link'])
             comment_replied_user_list = post_comment_data['reply_username_list']
             for user_index, comment_replied_user in enumerate(comment_replied_user_list):
-                comment_replied_user_id = Scraper.get_user_id_from_username(
-                    renderEngine.render_user_profile(comment_replied_user))
+                comment_replied_user_id = scraper.get_user_id_from_username(comment_replied_user)
                 comment_replied_user_list[user_index] = comment_replied_user_id
             data_frame.loc[index + 1] = \
                 generate_comment_sheet_data_frame(page_id,
@@ -243,15 +226,15 @@ def generate_comments_sheet(post_data_list):
 user_network_cache = {}
 user_liked_pages_cache = {}
 print("Please login to your facebook account")
-username = input("Username:  ")
+user_name = input("Username:  ")
 password = input("Password:  ")
 page_name = input("Enter page name (if page link is like https://www.facebook.com/NASA/, then enter only NASA): ")
 output_file_name = "facebook_{}.xlsx".format(page_name)
 writer = pd.ExcelWriter(output_file_name)
-renderEngine = RenderEngine(username, password)
+scraper = Scraper(user_name, password)
 post_list = get_post_list(page_name)
 generate_post_sheet(post_list)
 generate_like_sheet(post_list)
 generate_share_sheet(post_list)
 generate_comments_sheet(post_list)
-renderEngine.close_engine()
+scraper.close()

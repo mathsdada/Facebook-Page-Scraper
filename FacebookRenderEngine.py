@@ -13,8 +13,8 @@ class RenderEngine:
         self.__login_to_facebook(username, password)
 
     def __login_to_facebook(self, username, password):
-        # chrome_driver = r"C:\Users\sushg\Desktop\Data\Projects\Python\FacebookScraper\chromedriver"
-        chrome_driver = r"<replace me with chromedriver_path as mentioned in above example>"
+        chrome_driver = r"C:\Users\sushg\Desktop\Data\Projects\Python\FacebookScraper\chromedriver"
+        # chrome_driver = r"<replace me with chromedriver_path as mentioned in above example>"
         os.environ["webdriver.chrome.driver"] = chrome_driver
         self.__driver = webdriver.Chrome(chrome_driver)
 
@@ -114,7 +114,7 @@ class RenderEngine:
         if option == "network":
             link = "https://www.facebook.com/{}/friends".format(user_id)
         elif option == "liked_pages":
-            link = "{}/likes".format(user_id)
+            link = "https://www.facebook.com/{}/likes".format(user_id)
         else:
             return ""
         prev_user_network_size = 0
@@ -149,5 +149,6 @@ class RenderEngine:
                 reply_button.click()
         body = self.__driver.find_element_by_css_selector('body')
         body.send_keys(Keys.END)
+        time.sleep(2)
         html_source = self.__driver.page_source
         return html_source
