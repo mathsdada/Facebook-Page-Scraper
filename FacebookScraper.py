@@ -34,7 +34,6 @@ class Scraper:
         comment_time_tag = comment_block.find('abbr', class_='_4ghv _2b0a')
         if comment_time_tag is not None:
             comment_data['comment_time'] = comment_time_tag.text
-        print(comment_data)
         return comment_data
 
     def get_post_list(self, page_title):
