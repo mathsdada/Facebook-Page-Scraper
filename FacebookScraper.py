@@ -15,7 +15,7 @@ class Scraper:
         comment_data = {'comment_id': data_block.get('data-uniqueid'), 'comment_author': '',
                         'comment_message': 'Graphical Emoji', 'comment_like_link': '',
                         'parent_id': parent_id,
-                        'num_of_replies': 0, 'reply_username_list': []}
+                        'num_of_replies': 0, 'reply_username_list': [], 'comment_time': ''}
         comment_block = data_block.find('div', class_='_2b04')
         # extract author
         comment_data['comment_author'] = comment_block.find('div', class_='_2b05') \
@@ -30,6 +30,11 @@ class Scraper:
             .find('div', {'data-sigil': "comment-body"})
         if comment_message_tag is not None:
             comment_data['comment_message'] = comment_message_tag.text
+        # extract comment time
+        comment_time_tag = comment_block.find('abbr', class_='_4ghv _2b0a')
+        if comment_time_tag is not None:
+            comment_data['comment_time'] = comment_time_tag.text
+        print(comment_data)
         return comment_data
 
     def get_post_list(self, page_title):

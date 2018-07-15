@@ -172,7 +172,7 @@ def generate_share_sheet(post_data_list):
 def generate_comment_sheet_data_frame(page_id, comment_id, post_id, parent_id,
                                       comment_msg,
                                       comment_author, author_network,
-                                      comment_liked_users, comment_replied_users):
+                                      comment_liked_users, comment_replied_users, post_commented_time):
     follower = 0
     degree = 2
     if is_user_a_follower_of_page(comment_author, page_id):
@@ -191,7 +191,7 @@ def generate_comment_sheet_data_frame(page_id, comment_id, post_id, parent_id,
     return [comment_id, post_id, parent_id,
             comment_msg,
             comment_author, len(author_network), list_to_string(author_network, "Private"), follower, degree,
-            '',
+            post_commented_time,
             num_of_comment_likes, num_of_followers_in_likes, num_of_comment_likes - num_of_followers_in_likes,
             num_of_comment_replies, num_of_followers_in_replies, num_of_comment_replies - num_of_followers_in_replies]
 
@@ -217,7 +217,8 @@ def generate_comments_sheet(post_data_list):
                                                   post_comment_data['parent_id'],
                                                   post_comment_data['comment_message'],
                                                   comment_author_id, comment_author_network,
-                                                  comment_liked_user_list, comment_replied_user_list)
+                                                  comment_liked_user_list, comment_replied_user_list,
+                                                  post_comment_data['comment_time'])
             index += 1
     data_frame.to_excel(writer, "Comment", index=False)
     writer.save()
@@ -233,8 +234,8 @@ output_file_name = "facebook_{}.xlsx".format(page_name)
 writer = pd.ExcelWriter(output_file_name)
 scraper = Scraper(user_name, password)
 post_list = get_post_list(page_name)
-generate_post_sheet(post_list)
-generate_like_sheet(post_list)
-generate_share_sheet(post_list)
+# generate_post_sheet(post_list)
+# generate_like_sheet(post_list)
+# generate_share_sheet(post_list)
 generate_comments_sheet(post_list)
 scraper.close()
