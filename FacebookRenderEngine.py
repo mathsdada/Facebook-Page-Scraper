@@ -13,8 +13,8 @@ class RenderEngine:
         self.__login_to_facebook(username, password)
 
     def __login_to_facebook(self, username, password):
-        chrome_driver = r"C:\Users\sushg\Desktop\Data\Projects\Python\FacebookScraper\chromedriver"
-        # chrome_driver = r"<replace me with chromedriver_path as mentioned in above example>"
+        # chrome_driver = r"C:\Users\sushg\Desktop\Data\Projects\Python\FacebookScraper\chromedriver"
+        chrome_driver = r"<replace me with chromedriver_path as mentioned in above example>"
         os.environ["webdriver.chrome.driver"] = chrome_driver
         self.__driver = webdriver.Chrome(chrome_driver)
 
