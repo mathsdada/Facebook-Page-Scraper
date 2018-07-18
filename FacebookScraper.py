@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
 from FacebookRenderEngine import RenderEngine
 import json
+import time
 
 
 class Scraper:
@@ -10,8 +11,7 @@ class Scraper:
     def close(self):
         self.__render_engine.close_engine()
 
-    @staticmethod
-    def extract_comment_data(data_block, parent_id):
+    def __extract_comment_data(self, data_block, parent_id):
         comment_data = {'comment_id': data_block.get('data-uniqueid'), 'comment_author': '',
                         'comment_message': 'Graphical Emoji', 'comment_like_link': '',
                         'parent_id': parent_id,
@@ -36,6 +36,9 @@ class Scraper:
             comment_data['comment_time'] = comment_time_tag.text
         return comment_data
 
+    def __get_local_time_from_epoch(self, epoch_time):
+        return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(int(epoch_time)))
+
     def get_post_list(self, page_title):
         html_source = self.__render_engine.render_posts_of_page(page_title)
         post_data_template = {'page_id': '', 'post_id': '', 'post_published': '',
@@ -52,7 +55,8 @@ class Scraper:
             post_data['page_id'] = json_data['page_id']
             post_data['post_id'] = json_data['top_level_post_id']
             post_context = json_data['page_insights'][post_data['page_id']]['post_context']
-            post_data['post_published'] = post_context['publish_time']
+            post_data['post_published'] = self.__get_local_time_from_epoch(
+                post_context['publish_time'])
 
             # extract number of shares and comments
             share_comment_tags = post_tag.find_all('span', class_='_1j-c')
@@ -162,7 +166,8 @@ class Scraper:
                 share_data['share_link'] = share_block_share_link
 
             # Extract post shared time
-            share_data['published_time'] = share_block.find('abbr', class_='_5ptz').get('data-utime')
+            share_data['published_time'] = self.__get_local_time_from_epoch(
+                share_block.find('abbr', class_='_5ptz').get('data-utime'))
 
             share_data_list.append(share_data)
         return share_data_list
@@ -194,12 +199,12 @@ class Scraper:
         comment_blocks = soup.find_all('div', {'class': '_2a_i', 'data-sigil': 'comment'})
         for comment_block in comment_blocks:
             # get parent comment_data
-            parent_comment_data = Scraper.extract_comment_data(comment_block, '')
+            parent_comment_data = self.__extract_comment_data(comment_block, '')
             reply_blocks = comment_block.find_all('div', class_='_2a_i')
             parent_comment_data['num_of_replies'] = len(reply_blocks)
             for reply_block in reply_blocks:
                 # get reply comment_data
-                reply_comment_data = Scraper.extract_comment_data(reply_block, parent_comment_data['comment_id'])
+                reply_comment_data = self.__extract_comment_data(reply_block, parent_comment_data['comment_id'])
                 parent_comment_data['reply_username_list'].append(
                     reply_comment_data['comment_author'])
                 comment_data_list.append(reply_comment_data)
