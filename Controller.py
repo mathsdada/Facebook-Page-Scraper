@@ -1,11 +1,13 @@
 from FacebookScraper import Scraper
 import pandas as pd
 
+page_sheet_columns = ['# page likes', '# page followers']
 post_sheet_columns = ['status_id', 'status_message', 'status_type', 'status_published',
                       'num_reactions', 'num_comments', 'num_shares',
                       'num_likes', 'num_loves', 'num_wows', 'num_hahas', 'num_sads', 'num_angrys']
 like_sheet_columns = ['status_id', "user_id", "user_network_size", "user_network", "Follower", "Degree"]
-share_sheet_columns = ['status_id', "share_published_time", "user_id", "user_network_size", "user_network", "Follower", "Degree",
+share_sheet_columns = ['status_id', "share_published_time", "user_id", "user_network_size", "user_network", "Follower",
+                       "Degree",
                        "#likes on shares", "#followers on likes", "#not followers on likes",
                        '#comments on shares', '#followers on comments', '#not followers on comments',
                        "#shares on shares", "#followers on shares", "#not followers on shares"]
@@ -33,6 +35,14 @@ def get_post_list(page_title):
         reactions_data = scraper.get_reactions_count(post_data['post_like_link'])
         post_data.update(reactions_data)
     return post_data_list
+
+
+def generate_page_sheet(pagename):
+    page_data = scraper.get_page_data(pagename)
+    data_frame = pd.DataFrame(columns=page_sheet_columns)
+    data_frame.loc[1] = [page_data['page_likes'], page_data['page_followers']]
+    data_frame.to_excel(writer, "Page", index=False)
+    writer.save()
 
 
 def generate_post_sheet_data_frame(post_data):
@@ -234,6 +244,7 @@ output_file_name = "facebook_{}.xlsx".format(page_name)
 writer = pd.ExcelWriter(output_file_name)
 scraper = Scraper(user_name, password)
 post_list = get_post_list(page_name)
+generate_page_sheet(page_name)
 generate_post_sheet(post_list)
 generate_like_sheet(post_list)
 generate_share_sheet(post_list)
