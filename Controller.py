@@ -1,7 +1,7 @@
 from FacebookScraper import Scraper
 import pandas as pd
 
-post_sheet_columns = ['status_id', 'status_message', 'status_published',
+post_sheet_columns = ['status_id', 'status_message', 'status_type', 'status_published',
                       'num_reactions', 'num_comments', 'num_shares',
                       'num_likes', 'num_loves', 'num_wows', 'num_hahas', 'num_sads', 'num_angrys']
 like_sheet_columns = ['status_id', "user_id", "user_network_size", "user_network", "Follower", "Degree"]
@@ -37,7 +37,7 @@ def get_post_list(page_title):
 
 def generate_post_sheet_data_frame(post_data):
     # make sure below columns are in sync with post_sheet_columns
-    columns = ['post_id', 'post_message', 'post_published',
+    columns = ['post_id', 'post_message', 'post_type', 'post_published',
                'All', 'num_comments', 'num_shares',
                'Like', 'Wow', 'Love', 'Haha', 'Sad', 'Angry']
     if len(post_sheet_columns) != len(columns):

@@ -39,9 +39,20 @@ class Scraper:
     def __get_local_time_from_epoch(self, epoch_time):
         return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(int(epoch_time)))
 
+    def __get_type_of_post(self, post_block):
+        if post_block.find('a', class_='_39pi') is not None:
+            return 'Photo'
+        if post_block.find('a', class_='_39pi _26ih') is not None:
+            return 'Photo'
+        if post_block.find('i', class_='img _lt3 _4s0y') is not None:
+            return 'Video'
+        if post_block.find('a', class_='touchable _4qxt') is not None:
+            return 'Link'
+        return 'Text'
+
     def get_post_list(self, page_title):
         html_source = self.__render_engine.render_posts_of_page(page_title)
-        post_data_template = {'page_id': '', 'post_id': '', 'post_published': '',
+        post_data_template = {'page_id': '', 'post_id': '', 'post_type': '', 'post_published': '',
                               'num_shares': 0, 'num_comments': 0}
         post_data_list = []
         soup = BeautifulSoup(html_source, 'html.parser')
@@ -57,6 +68,7 @@ class Scraper:
             post_context = json_data['page_insights'][post_data['page_id']]['post_context']
             post_data['post_published'] = self.__get_local_time_from_epoch(
                 post_context['publish_time'])
+            post_data['post_type'] = self.__get_type_of_post(post_tag)
 
             # extract number of shares and comments
             share_comment_tags = post_tag.find_all('span', class_='_1j-c')
