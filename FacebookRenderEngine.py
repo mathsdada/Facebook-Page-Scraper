@@ -37,6 +37,14 @@ class RenderEngine:
         html_source = self.__driver.page_source
         return html_source
 
+    def render_facebook_page(self, link):
+        self.__driver.get(link)
+        body = self.__driver.find_element_by_css_selector('body')
+        body.send_keys(Keys.END)
+        time.sleep(2)
+        html_source = self.__driver.page_source
+        return html_source
+
     def render_get_username_from_user_id(self, user_id):
         link = "https://www.facebook.com/{}".format(user_id)
         self.__driver.get(link)

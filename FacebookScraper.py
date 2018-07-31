@@ -243,7 +243,7 @@ class Scraper:
     def get_page_data(self, page_id):
         data = {'page_likes': '', 'page_followers': ''}
         page_link = "https://m.facebook.com/{}".format(page_id)
-        html_source = self.__render_engine.render_web_page(page_link)
+        html_source = self.__render_engine.render_facebook_page(page_link)
         soup = BeautifulSoup(html_source, 'html.parser')
         for item in soup.find_all('div', class_='_59k _2rgt _1j-f _2rgt _2rgt'):
             if "people like this" in item.text:
