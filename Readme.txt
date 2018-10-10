@@ -23,3 +23,5 @@ How to Run:
 	1. In line-17 of FacebookRenderEngine.py file, add the path of chromedriver.
 	2. Run the program using : python3 Controller.py
 	
+Note
+This tool is for research purposes only. Hence, the developers of this tool won't be responsible for any misuse of data collected using this tool.
